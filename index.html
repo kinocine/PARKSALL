@@ -202,22 +202,21 @@
     .meta-action-btn {
       background: #ffffff;
       border: 1px solid var(--border);
-      padding: 4px 8px;
+      width: 28px;
+      height: 26px;
       border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 14px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      justify-content: center;
       transition: all 0.2s;
     }
     .meta-action-btn:hover { background: #f1f5f9; }
     .meta-action-btn.active-target {
       background: #eff6ff;
       border-color: var(--primary);
-      color: var(--primary);
-      font-weight: 700;
+      filter: drop-shadow(0 0 2px rgba(26,115,232,0.4));
     }
 
     /* 리뷰 리스트 */
@@ -375,17 +374,32 @@
       font-size: 13px;
       outline: none;
     }
-    .btn-spin-action {
-      background: #4f46e5;
+    .btn-add-action {
+      background: var(--primary);
       color: white;
       border: none;
-      padding: 0 14px;
+      padding: 0 12px;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 15px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.2s;
+    }
+    .btn-add-action:hover { background: var(--primary-hover); }
+    .btn-spin-action {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
     }
     .btn-spin-action:hover { background: #4338ca; }
 
@@ -411,7 +425,6 @@
       gap: 10px;
       flex: 1;
       min-width: 0;
-      cursor: pointer;
     }
     .todo-num-badge {
       display: inline-flex;
@@ -434,6 +447,14 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .todo-row-clickable {
+      cursor: pointer;
+    }
+    .todo-row-clickable:hover .todo-text {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
     .todo-btn-group {
       display: flex;
       gap: 4px;
@@ -490,7 +511,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      cursor: pointer;
     }
     .btn-restore {
       background: #475569;
@@ -544,9 +564,7 @@
     <div class="header-top">
       <div class="site-title" onclick="switchView('todo')">Park's All</div>
       <div class="nav-shortcuts">
-        <!-- 팝업 모달 대신 개봉일 타임라인 페이지로 직접 전환 -->
         <button class="icon-btn" id="navBtnRelease" onclick="switchView('timeline')" title="개봉일 타임라인">📅</button>
-        <!-- 작업 순서 (To-Do)로 즉시 전환 -->
         <button class="icon-btn active" id="navBtnTodo" onclick="switchView('todo')" title="작업 순서 (스피너)">🎯</button>
       </div>
     </div>
@@ -565,8 +583,10 @@
         <span>🎯 Task Priority To-Do List</span>
       </div>
 
+      <!-- 새 일 추가 & 스핀 입력창 -->
       <div class="todo-input-bar">
-        <input type="text" id="taskInput" placeholder="새 일 추가 (쉼표로 구분하여 여러 개 추가 가능)" onkeydown="if(event.key==='Enter') handleAddTasks()">
+        <input type="text" id="taskInput" placeholder="새 일 추가 (쉼표로 구분 가능)" onkeydown="if(event.key==='Enter') handleAddTasks()">
+        <button class="btn-add-action" onclick="handleAddTasks()" title="추가">➕</button>
         <button class="btn-spin-action" onclick="shuffleCurrentTasks()" title="순서 재지정 (일괄 스핀)">🔀</button>
       </div>
 
@@ -588,7 +608,7 @@
     </div>
   </div>
 
-  <!-- 메인 2: 전체 개봉일 타임라인 뷰 (팝업 없애고 메인 화면으로 표시) -->
+  <!-- 메인 2: 전체 개봉일 타임라인 뷰 -->
   <div id="viewTimeline" style="display: none;">
     <div class="card">
       <div class="card-title">
@@ -615,8 +635,9 @@
         </div>
         <div class="movie-meta-row">
           <span>개봉일: <strong id="detailReleaseDateText">미정</strong></span>
-          <button class="meta-action-btn" onclick="switchView('timeline')" title="전체 개봉일 목록 보기">📅 개봉일목록</button>
-          <button class="meta-action-btn" id="btnMovieTargetToggle" onclick="handleToggleMoviePriority()">🎯 순서에 추가</button>
+          <!-- 글자를 빼고 아이콘 전용 버튼으로 구성 -->
+          <button class="meta-action-btn" onclick="switchView('timeline')" title="개봉일 목록">📅</button>
+          <button class="meta-action-btn" id="btnMovieTargetToggle" onclick="handleToggleMoviePriority()" title="순서 추가/삭제">🎯</button>
         </div>
       </div>
 
@@ -731,7 +752,6 @@
     document.getElementById('viewMovieDetail').style.display = viewName === 'detail' ? 'block' : 'none';
     document.getElementById('viewNewMovie').style.display = viewName === 'new' ? 'block' : 'none';
 
-    // 네비게이션 버튼 활성화 스타일 제어
     document.getElementById('navBtnTodo').classList.toggle('active', viewName === 'todo');
     document.getElementById('navBtnRelease').classList.toggle('active', viewName === 'timeline');
 
@@ -828,10 +848,10 @@
       }
     });
 
-    // 2. 순서 토글 버튼 동기화
+    // 2. 순서 버튼 상태 동기화
     updateMovieTargetButtonUI();
 
-    // 3. 매체별 리뷰 링크: [매체명] 기사제목 표출[cite: 8]
+    // 3. 매체별 리뷰 링크
     const reviewsArea = document.getElementById('movieReviewsArea');
     reviewsArea.innerHTML = '';
 
@@ -855,9 +875,7 @@
     }
   }
 
-  /* ================== 순서 토글 판별 (완료된 작업은 순서 제외 판정) ================== */
   function isMovieInActiveTasks(title) {
-    // 오직 '진행 중(active)'인 상태만 순서에 포함된 것으로 간주
     return tasks.some(t => t.text === title && t.status === 'active');
   }
 
@@ -866,13 +884,11 @@
     if (!currentMovie || !btn) return;
 
     if (isMovieInActiveTasks(currentMovie["영화제목"])) {
-      btn.innerText = "🎯 순서 제거";
       btn.classList.add('active-target');
-      btn.title = "현재 순서에 포함됨 (클릭 시 제거)";
+      btn.title = "현재 순서에 포함됨 (클릭 시 순서에서 제거)";
     } else {
-      btn.innerText = "🎯 순서에 추가";
       btn.classList.remove('active-target');
-      btn.title = "순서에 추가";
+      btn.title = "순서(스피너)에 추가";
     }
   }
 
@@ -1110,6 +1126,10 @@
   }
 
   /* ================== To-Do / 스피너 로직 ================== */
+  function isKnownMovie(title) {
+    return allMovies.some(m => m["영화제목"] === title);
+  }
+
   function renderTodoBoard() {
     const listContainer = document.getElementById('todoListContainer');
     const keepContainer = document.getElementById('keepListContainer');
@@ -1129,10 +1149,15 @@
       listContainer.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px 0; font-size:13px;">진행 중인 작업이 없습니다.</div>';
     } else {
       activeTasks.forEach((t, idx) => {
+        const isMovie = isKnownMovie(t.text);
+        const clickableClass = isMovie ? 'todo-row-clickable' : '';
+        const clickAttr = isMovie ? `onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')"` : '';
+        const titleAttr = isMovie ? 'title="영화 상세 보기"' : 'title="일반 과업"';
+
         const row = document.createElement('div');
         row.className = 'todo-row';
         row.innerHTML = `
-          <div class="todo-row-left" onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')">
+          <div class="todo-row-left ${clickableClass}" ${clickAttr} ${titleAttr}>
             <span class="todo-num-badge">${idx + 1}</span>
             <span class="todo-text">${escapeHtml(t.text)}</span>
           </div>
@@ -1149,11 +1174,15 @@
     if (keepTasks.length > 0) {
       keepSection.style.display = 'block';
       keepTasks.forEach(t => {
+        const isMovie = isKnownMovie(t.text);
+        const clickableClass = isMovie ? 'todo-row-clickable' : '';
+        const clickAttr = isMovie ? `onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')"` : '';
+
         const row = document.createElement('div');
         row.className = 'todo-row';
         row.style.border = '1px dashed #f59e0b';
         row.innerHTML = `
-          <div class="todo-row-left" onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')">
+          <div class="todo-row-left ${clickableClass}" ${clickAttr}>
             <span class="todo-num-badge" style="background:#fef3c7; border-color:#fde68a; color:#b45309;">K</span>
             <span class="todo-text">${escapeHtml(t.text)}</span>
           </div>
@@ -1173,10 +1202,14 @@
       doneCard.style.display = 'block';
       document.getElementById('doneCount').innerText = doneTasks.length;
       doneTasks.forEach(t => {
+        const isMovie = isKnownMovie(t.text);
+        const clickAttr = isMovie ? `onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')"` : '';
+        const cursorStyle = isMovie ? 'cursor:pointer;' : 'cursor:default;';
+
         const row = document.createElement('div');
         row.className = 'done-row';
         row.innerHTML = `
-          <span class="done-text" onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')">✔ ${escapeHtml(t.text)}</span>
+          <span class="done-text" style="${cursorStyle}" ${clickAttr}>✔ ${escapeHtml(t.text)}</span>
           <div style="display:flex; gap:4px;">
             <button class="btn-restore" onclick="setTaskStatus('${t.id}', 'active')">되돌리기</button>
             <button class="todo-btn btn-del" style="width:24px; height:22px; font-size:10px;" onclick="deleteTask('${t.id}')">D</button>
@@ -1189,10 +1222,9 @@
     }
   }
 
-  // 투두 항목 클릭 시 등록된 영화면 상세 화면으로 바로 이동
+  // 영화로 등록된 과업만 상세 이동
   function goToMovieDetailIfMatches(taskText) {
-    const movie = allMovies.find(m => m["영화제목"] === taskText);
-    if (movie) {
+    if (isKnownMovie(taskText)) {
       document.getElementById('mainSearchInput').value = taskText;
       executeSearch();
     }
@@ -1229,7 +1261,13 @@
     syncTodoServer();
   }
 
+  // 스핀 버튼 클릭 시: 입력창에 글이 남아있다면 먼저 등록한 뒤 전체 셔플 진행
   function shuffleCurrentTasks() {
+    const input = document.getElementById('taskInput');
+    if (input.value.trim()) {
+      handleAddTasks();
+    }
+
     let activeTasks = tasks.filter(t => t.status === 'active');
     if (activeTasks.length <= 1) return;
 
@@ -1258,7 +1296,6 @@
       target.status = newStatus;
       renderTodoBoard();
       syncTodoServer();
-      // 영화 상세 화면이 열려있거나 해당 영화의 버튼 상태가 즉시 토글되도록 갱신
       if (currentMovie) updateMovieTargetButtonUI();
     }
   }
@@ -1287,7 +1324,6 @@
       return;
     }
 
-    // 개봉일 오름차순 정렬
     const sorted = [...allMovies].sort((a, b) => {
       const da = a["개봉일"] || '';
       const db = b["개봉일"] || '';
