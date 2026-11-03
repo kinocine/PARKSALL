@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Park's All</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --primary-hover: #1557b0;
+      --bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --border: #dadce0;
+      --text: #202124;
+      --subtext: #5f6368;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 12px;
+      padding-bottom: 80px;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    /* 1. 상단 헤더 & 컨트롤 */
+    header {
+      background: var(--card-bg);
+      padding: 14px 16px;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .site-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    .nav-shortcuts {
+      display: flex;
+      gap: 6px;
+    }
+    .nav-tag-btn {
+      border: 1px solid var(--border);
+      background: #f8f9fa;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s;
+    }
+    .nav-tag-btn:hover {
+      background: #e8f0fe;
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* 상단 검색바 */
+    .search-wrapper {
+      display: flex;
+      gap: 6px;
+    }
+    .search-wrapper input {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      background: #fafafa;
+    }
+    .search-wrapper input:focus {
+      background: #fff;
+      border-color: var(--primary);
+    }
+    .btn-search {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    /* 공통 카드 스타일 */
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 2. 영화 검색 결과 뷰 (2번) */
+    .movie-detail-header {
+      padding-bottom: 10px;
+      border-bottom: 1px solid #edf0f2;
+      margin-bottom: 12px;
+    }
+    .movie-detail-title-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .movie-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111;
+    }
+    .badge-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .badge-c { background: #fce8e6; color: #d93025; border: 1px solid #fad2cf; }
+    .badge-p { background: #e8edff; color: #4e73df; border: 1px solid #c9d7fe; }
+    .badge-u { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
+
+    /* 리뷰 리스트 */
+    .review-item {
+      background: #f8f9fa;
+      padding: 9px 12px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      border-left: 3px solid var(--primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .review-link {
+      font-weight: 600;
+      color: var(--primary);
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .review-link:hover { text-decoration: underline; }
+
+    /* 3. 신규 영화 등록 폼 (3번) */
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--subtext);
+      margin-bottom: 4px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+    .form-group input:focus { border-color: var(--primary); }
+    .btn-submit-main {
+      width: 100%;
+      padding: 11px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    /* 4. 스피너 & 투두 영역 */
+    .todo-item {
+      background: white;
+      border: 1px solid #e3e6f0;
+      border-radius: 6px;
+      padding: 9px 12px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .todo-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .todo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 22px;
+      background: #e8edff;
+      color: #4e73df;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .todo-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .todo-actions button {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-done { background: #1cc88a; color: white; }
+    .btn-delete { background: #e74a3b; color: white; }
+    .btn-keep { background: #f6c23e; color: #333; }
+
+    /* 모달 팝업 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-box {
+      background: white;
+      width: 92%;
+      max-width: 500px;
+      max-height: 85vh;
+      border-radius: 10px;
+      padding: 18px;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #888;
+    }
+    .loading-bar {
+      text-align: center;
+      font-size: 12px;
+      color: var(--primary);
+      margin-bottom: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- 1. 상단 바 -->
+  <header>
+    <div class="header-top">
+      <div class="site-title" onclick="goHome()">Park's All</div>
+      <div class="nav-shortcuts">
+        <button class="nav-tag-btn" onclick="openReleaseModal()">📅 개봉일</button>
+        <button class="nav-tag-btn" onclick="openSpinnerModal()">🎯 순서(스핀)</button>
+        <button class="nav-tag-btn" onclick="showNewMovieView('')">➕ 새 영화</button>
+      </div>
+    </div>
+    <div class="search-wrapper">
+      <input type="text" id="mainSearchInput" placeholder="영화 제목 검색..." onkeydown="if(event.key==='Enter') executeSearch()">
+      <button class="btn-search" onclick="executeSearch()">검색</button>
+    </div>
+  </header>
+
+  <div id="loadingStatus" class="loading-bar">데이터를 연동 중입니다...</div>
+
+  <!-- 1번 화면: 평상시 메인 (To-Do List 기본 노출) -->
+  <div id="viewHome">
+    <div class="card">
+      <div class="card-title">
+        <span>📋 To-Do List</span>
+        <button class="nav-tag-btn" onclick="openSpinnerModal()">+ 일괄 스핀</button>
+      </div>
+
+      <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+        <input type="text" id="quickTaskInput" placeholder="새 할 일 입력..." style="flex:1; padding:8px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px;" onkeydown="if(event.key==='Enter') addQuickTask()">
+        <button class="btn-search" onclick="addQuickTask()">추가</button>
+      </div>
+
+      <div id="todoListArea"></div>
+    </div>
+  </div>
+
+  <!-- 2번 화면: 영화 상세 결과 뷰 (검색 성공 시) -->
+  <div id="viewMovieDetail" style="display: none;">
+    <div class="card">
+      <div class="movie-detail-header">
+        <div class="movie-detail-title-row">
+          <span class="movie-name" id="detailMovieTitle"></span>
+          <!-- (c), (p) 아이콘 -->
+          <span class="badge-icon badge-c" id="badgeRelease" onclick="openReleaseModal()" title="개봉일 정보 열기">(c)</span>
+          <span class="badge-icon badge-p" id="badgePriority" onclick="sendToTodoFromMovie()" title="작업 우선순위(스피너)에 추가">(p)</span>
+          <!-- (u1) ~ (u5) -->
+          <span id="detailUrlsArea" style="display:inline-flex; gap:4px;"></span>
+        </div>
+        <div style="font-size: 13px; color: var(--subtext);" id="detailReleaseDate">개봉일: 미정</div>
+      </div>
+
+      <div class="card-title" style="font-size: 14px; margin-top: 14px;">
+        <span>📝 매체별 리뷰 링크</span>
+      </div>
+      <div id="movieReviewsArea"></div>
+
+      <!-- 해당 영화에 리뷰 링크 추가 폼 -->
+      <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border);">
+        <div style="font-size: 12px; font-weight: 600; margin-bottom: 6px;">+ 새 리뷰 링크 등록</div>
+        <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+          <input type="text" id="addReviewMedia" placeholder="매체명 (예: KBS)" style="width: 35%; padding: 7px; border: 1px solid var(--border); border-radius: 5px; font-size: 12px;">
+          <input type="url" id="addReviewUrl" placeholder="리뷰 주소 (https://...)" style="flex: 1; padding: 7px; border: 1px solid var(--border); border-radius: 5px; font-size: 12px;">
+        </div>
+        <button class="btn-search" style="width: 100%; height: 32px;" onclick="addReviewOnly()">리뷰 링크 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3번 화면: 새 영화 등록 폼 (검색 결과 없거나 신규 등록) -->
+  <div id="viewNewMovie" style="display: none;">
+    <div class="card">
+      <div class="card-title">
+        <span>🎬 새 영화 등록</span>
+        <button class="nav-tag-btn" onclick="goHome()">취소</button>
+      </div>
+
+      <div class="form-group">
+        <label>영화 제목</label>
+        <input type="text" id="newTitle" required>
+      </div>
+      <div class="form-group">
+        <label>개봉일</label>
+        <input type="date" id="newReleaseDate">
+      </div>
+      <div class="form-group" style="display: flex; gap: 6px;">
+        <div style="width: 40%;">
+          <label>매체명</label>
+          <input type="text" id="newMedia" placeholder="예: KBS / 키노시네">
+        </div>
+        <div style="flex: 1;">
+          <label>리뷰 주소</label>
+          <input type="url" id="newReviewUrl" placeholder="https://...">
+        </div>
+      </div>
+
+      <div style="margin: 12px 0 6px 0; font-size: 12px; font-weight: 700; color: var(--subtext);">
+        🔗 참고 링크 (u1 ~ u5)
+      </div>
+      <div class="form-group"><input type="url" id="newU1" placeholder="🔗 URL 1 (공식/정보)"></div>
+      <div class="form-group"><input type="url" id="newU2" placeholder="🔗 URL 2 (예고편)"></div>
+      <div class="form-group"><input type="url" id="newU3" placeholder="🔗 URL 3"></div>
+      <div class="form-group"><input type="url" id="newU4" placeholder="🔗 URL 4"></div>
+      <div class="form-group"><input type="url" id="newU5" placeholder="🔗 URL 5"></div>
+
+      <button class="btn-submit-main" onclick="submitNewMovie()">영화 정보 등록</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- 개봉일 모달 (releaseday 뷰) -->
+<div class="modal-overlay" id="releaseModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 style="font-size: 16px;">📅 개봉일 타임라인</h3>
+      <button class="close-btn" onclick="closeModal('releaseModal')">✕</button>
+    </div>
+    <div id="releaseModalList"></div>
+  </div>
+</div>
+
+<!-- 우선순위 스피너 모달 (spinner 뷰) -->
+<div class="modal-overlay" id="spinnerModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 style="font-size: 16px;">🎯 작업 우선순위 스피너</h3>
+      <button class="close-btn" onclick="closeModal('spinnerModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>할 일 목록 (한 줄에 하나씩)</label>
+      <textarea id="spinnerBulkText" style="width:100%; height:120px; padding:8px; border:1px solid var(--border); border-radius:6px; font-size:13px;"></textarea>
+    </div>
+    <button class="btn-submit-main" onclick="runSpinnerShuffle()">Spin! (무작위 우선순위 재정렬)</button>
+  </div>
+</div>
+
+<script>
+  // 배포하신 웹 앱 URL
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzzeY6T2kLpwzA-sOlwojt1_KPR2N3ekjqS0zPSlZ8UJ7XzsQ7GYTOohKf3-2_L3urR/exec";
+
+  let currentTodos = [];
+  let currentMovies = [];
+  let currentActiveMovie = null;
+
+  window.onload = function() {
+    loadInitialData();
+  };
+
+  function showLoading(show) {
+    document.getElementById('loadingStatus').style.display = show ? 'block' : 'none';
+  }
+
+  // 초기 데이터 (투두 + 영화목록) 로드
+  function loadInitialData() {
+    showLoading(true);
+    fetch(`${GAS_URL}?action=getInitialData`)
+      .then(res => res.json())
+      .then(data => {
+        showLoading(false);
+        if (data.status === "success") {
+          currentTodos = data.todos || [];
+          currentMovies = data.movies || [];
+          renderTodoList();
+        }
+      })
+      .catch(err => {
+        showLoading(false);
+        console.error("초기 로드 실패:", err);
+      });
+  }
+
+  // 메인 홈 이동
+  function goHome() {
+    document.getElementById('viewHome').style.display = 'block';
+    document.getElementById('viewMovieDetail').style.display = 'none';
+    document.getElementById('viewNewMovie').style.display = 'none';
+    document.getElementById('mainSearchInput').value = '';
+  }
+
+  // 영화 검색 실행 (1번 검색창 -> 2번 상세 또는 3번 등록)
+  function executeSearch() {
+    const query = document.getElementById('mainSearchInput').value.trim();
+    if (!query) {
+      goHome();
+      return;
+    }
+
+    showLoading(true);
+    fetch(`${GAS_URL}?action=searchMovie&title=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(res => {
+        showLoading(false);
+        if (res.status === "found") {
+          showMovieDetail(res.movie, res.reviews);
+        } else {
+          // 일치하는 영화가 없으면 3번 신규 등록 뷰로 안내
+          showNewMovieView(query);
+        }
+      })
+      .catch(err => {
+        showLoading(false);
+        alert("검색 중 오류가 발생했습니다: " + err);
+      });
+  }
+
+  // 2번 화면 렌더링: 영화 상세 결과
+  function showMovieDetail(movie, reviews) {
+    currentActiveMovie = movie;
+
+    document.getElementById('viewHome').style.display = 'none';
+    document.getElementById('viewNewMovie').style.display = 'none';
+    document.getElementById('viewMovieDetail').style.display = 'block';
+
+    document.getElementById('detailMovieTitle').innerText = movie["영화제목"];
+    document.getElementById('detailReleaseDate').innerText = `개봉일: ${movie["개봉일"] ? movie["개봉일"].substring(0, 10) : "미정"}`;
+
+    // u1 ~ u5 URL 배지 생성 (있는 것만 노출)
+    const urlContainer = document.getElementById('detailUrlsArea');
+    urlContainer.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+      const url = movie[`URL${i}`];
+      if (url && url.trim() !== '') {
+        const uBadge = document.createElement('a');
+        uBadge.className = 'badge-icon badge-u';
+        uBadge.href = url;
+        uBadge.target = '_blank';
+        uBadge.innerText = `(u${i})`;
+        uBadge.title = url;
+        urlContainer.appendChild(uBadge);
+      }
+    }
+
+    // 리뷰 목록 렌더링
+    const reviewsArea = document.getElementById('movieReviewsArea');
+    reviewsArea.innerHTML = '';
+    if (!reviews || reviews.length === 0) {
+      reviewsArea.innerHTML = '<div style="font-size:12px; color:#888; padding:8px 0;">등록된 리뷰 링크가 없습니다.</div>';
+    } else {
+      reviews.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'review-item';
+        item.innerHTML = `
+          <a href="${r["리뷰주소"]}" target="_blank" class="review-link">🔗 [${escapeHtml(r["매체명"])}] ${escapeHtml(r["리뷰주소"])}</a>
+          <span style="font-size:11px; color:#888;">${r["작성일"] ? r["작성일"].substring(0, 10) : ''}</span>
+        `;
+        reviewsArea.appendChild(item);
+      });
+    }
+  }
+
+  // 3번 화면: 신규 등록 폼 열기
+  function showNewMovieView(prefillTitle) {
+    document.getElementById('viewHome').style.display = 'none';
+    document.getElementById('viewMovieDetail').style.display = 'none';
+    document.getElementById('viewNewMovie').style.display = 'block';
+
+    document.getElementById('newTitle').value = prefillTitle || '';
+    document.getElementById('newReleaseDate').value = '';
+    document.getElementById('newMedia').value = '';
+    document.getElementById('newReviewUrl').value = '';
+    document.getElementById('newU1').value = '';
+    document.getElementById('newU2').value = '';
+    document.getElementById('newU3').value = '';
+    document.getElementById('newU4').value = '';
+    document.getElementById('newU5').value = '';
+  }
+
+  // 신규 영화 저장 제출 (doPost: saveMovieWithReview)
+  function submitNewMovie() {
+    const title = document.getElementById('newTitle').value.trim();
+    if (!title) { alert("영화 제목을 입력해주세요."); return; }
+
+    const payload = {
+      action: "saveMovieWithReview",
+      title: title,
+      releaseDate: document.getElementById('newReleaseDate').value,
+      media: document.getElementById('newMedia').value,
+      reviewUrl: document.getElementById('newReviewUrl').value,
+      urls: [
+        document.getElementById('newU1').value.trim(),
+        document.getElementById('newU2').value.trim(),
+        document.getElementById('newU3').value.trim(),
+        document.getElementById('newU4').value.trim(),
+        document.getElementById('newU5').value.trim()
+      ]
+    };
+
+    showLoading(true);
+    fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(() => {
+      showLoading(false);
+      alert("등록되었습니다!");
+      document.getElementById('mainSearchInput').value = title;
+      executeSearch();
+    })
+    .catch(err => {
+      showLoading(false);
+      alert("등록 실패: " + err);
+    });
+  }
+
+  // 기존 상세 영화에 리뷰만 추가 (doPost: addReviewOnly)
+  function addReviewOnly() {
+    if (!currentActiveMovie) return;
+    const media = document.getElementById('addReviewMedia').value.trim();
+    const url = document.getElementById('addReviewUrl').value.trim();
+    if (!media || !url) { alert("매체명과 URL을 모두 입력해주세요."); return; }
+
+    const payload = {
+      action: "addReviewOnly",
+      title: currentActiveMovie["영화제목"],
+      media: media,
+      reviewUrl: url
+    };
+
+    showLoading(true);
+    fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(() => {
+      showLoading(false);
+      document.getElementById('addReviewMedia').value = '';
+      document.getElementById('addReviewUrl').value = '';
+      executeSearch();
+    })
+    .catch(err => {
+      showLoading(false);
+      alert("리뷰 추가 실패: " + err);
+    });
+  }
+
+  // 영화 상세 화면의 (p)를 눌러 해당 영화 리뷰 작업을 To-Do에 추가
+  function sendToTodoFromMovie() {
+    if (!currentActiveMovie) return;
+    const task = `[리뷰작성] ${currentActiveMovie["영화제목"]}`;
+    addTodoToServer(task, currentActiveMovie["영화제목"]);
+  }
+
+  // To-Do 렌더링
+  function renderTodoList() {
+    const container = document.getElementById('todoListArea');
+    container.innerHTML = '';
+
+    const activeTodos = currentTodos.filter(t => !t["완료여부"]);
+    if (activeTodos.length === 0) {
+      container.innerHTML = '<div style="text-align:center; color:#888; padding:20px 0; font-size:13px;">현재 진행 중인 할 일이 없습니다.</div>';
+      return;
+    }
+
+    activeTodos.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'todo-item';
+      item.innerHTML = `
+        <div class="todo-left">
+          <span class="todo-badge">${t["우선순위"] || '•'}</span>
+          <span style="word-break:break-all;">${escapeHtml(t["할일내용"])}</span>
+        </div>
+        <div class="todo-actions">
+          <button class="btn-done" title="완료" onclick="toggleTodoStatus('${t["할일ID"]}')">完</button>
+        </div>
+      `;
+      container.appendChild(item);
+    });
+  }
+
+  // 빠른 단일 할일 추가
+  function addQuickTask() {
+    const input = document.getElementById('quickTaskInput');
+    const task = input.value.trim();
+    if (!task) return;
+    addTodoToServer(task, "");
+    input.value = "";
+  }
+
+  function addTodoToServer(task, relatedMovie) {
+    showLoading(true);
+    fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "addTodo",
+        task: task,
+        priority: currentTodos.length + 1,
+        relatedMovie: relatedMovie
+      })
+    })
+    .then(res => res.json())
+    .then(() => {
+      loadInitialData();
+    })
+    .catch(err => {
+      showLoading(false);
+      alert("할일 등록 실패: " + err);
+    });
+  }
+
+  function toggleTodoStatus(todoId) {
+    showLoading(true);
+    fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "toggleTodo", todoId: todoId, status: true })
+    })
+    .then(res => res.json())
+    .then(() => loadInitialData())
+    .catch(err => {
+      showLoading(false);
+      alert("처리 실패: " + err);
+    });
+  }
+
+  // 모달 제어
+  function openReleaseModal() {
+    document.getElementById('releaseModal').style.display = 'flex';
+    const listArea = document.getElementById('releaseModalList');
+    listArea.innerHTML = '';
+
+    // 개봉일 오름차순 정렬
+    const sorted = [...currentMovies].sort((a, b) => {
+      if (!a["개봉일"]) return 1;
+      if (!b["개봉일"]) return -1;
+      return String(a["개봉일"]).localeCompare(String(b["개봉일"]));
+    });
+
+    if (sorted.length === 0) {
+      listArea.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">개봉일 정보가 없습니다.</div>';
+      return;
+    }
+
+    sorted.slice(0, 15).forEach(m => {
+      const row = document.createElement('div');
+      row.style.cssText = "display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-size:13px;";
+      row.innerHTML = `
+        <span style="font-weight:600; cursor:pointer; color:var(--primary);" onclick="selectFromModal('${escapeHtml(m["영화제목"])}')">${escapeHtml(m["영화제목"])}</span>
+        <span style="color:#d93025; font-weight:700;">${m["개봉일"] ? m["개봉일"].substring(0, 10) : '미정'}</span>
+      `;
+      listArea.appendChild(row);
+    });
+  }
+
+  function selectFromModal(title) {
+    closeModal('releaseModal');
+    document.getElementById('mainSearchInput').value = title;
+    executeSearch();
+  }
+
+  function openSpinnerModal() {
+    document.getElementById('spinnerModal').style.display = 'flex';
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  // 스피너 셔플 등록
+  function runSpinnerShuffle() {
+    const text = document.getElementById('spinnerBulkText').value.trim();
+    if (!text) { alert("목록을 입력해주세요."); return; }
+
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l !== '');
+    // 무작위 셔플
+    for (let i = lines.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [lines[i], lines[j]] = [lines[j], lines[i]];
+    }
+
+    closeModal('spinnerModal');
+    document.getElementById('spinnerBulkText').value = '';
+
+    // 순차 등록
+    lines.forEach((task, idx) => {
+      fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "addTodo", task: task, priority: idx + 1 })
+      });
+    });
+
+    setTimeout(() => loadInitialData(), 1000);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+</script>
+
+</body>
+</html>
