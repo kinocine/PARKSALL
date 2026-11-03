@@ -32,7 +32,6 @@
       margin: 0 auto;
     }
 
-    /* 상단 헤더 */
     header {
       background: var(--card-bg);
       padding: 12px 14px;
@@ -71,8 +70,11 @@
       transition: all 0.2s;
     }
     .icon-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .icon-btn.active {
+      background: #e8f0fe;
+      border-color: var(--primary);
+    }
 
-    /* 상단 검색바 */
     .search-wrapper {
       display: flex;
       gap: 6px;
@@ -105,7 +107,6 @@
     }
     .btn-search:hover { background: var(--primary-hover); }
 
-    /* 공통 카드 */
     .card {
       background: var(--card-bg);
       border-radius: 14px;
@@ -123,7 +124,7 @@
       align-items: center;
     }
 
-    /* 영화 상세 뷰 */
+    /* 영화 상세 */
     .movie-detail-header {
       padding-bottom: 12px;
       border-bottom: 1px solid var(--border);
@@ -170,7 +171,6 @@
     .btn-action-icon:hover { background: #f1f5f9; color: var(--text); }
     .btn-action-del:hover { background: #fee2e2; color: var(--red); border-color: #fecaca; }
 
-    /* 플랫폼 뱃지: 순수 아이콘만 표출 */
     .badge-icon {
       display: inline-flex;
       align-items: center;
@@ -213,8 +213,6 @@
       transition: all 0.2s;
     }
     .meta-action-btn:hover { background: #f1f5f9; }
-    
-    /* 스피너 토글 버튼 활성 스타일 */
     .meta-action-btn.active-target {
       background: #eff6ff;
       border-color: var(--primary);
@@ -222,7 +220,7 @@
       font-weight: 700;
     }
 
-    /* 리뷰 리스트: [매체명] 기사제목 표출 */
+    /* 리뷰 리스트 */
     .review-item {
       background: #f8fafc;
       padding: 10px 12px;
@@ -251,7 +249,7 @@
       margin-right: 6px;
     }
 
-    /* 폼 관련 */
+    /* 폼 요소 */
     .form-group { margin-bottom: 10px; }
     .form-group label {
       display: block;
@@ -319,7 +317,6 @@
     }
     .target-toggle-icon.active { filter: grayscale(0%); }
 
-    /* 매체 리뷰 증식 행 */
     .review-dynamic-row {
       display: flex;
       gap: 4px;
@@ -364,7 +361,7 @@
       margin-top: 8px;
     }
 
-    /* 스피너 투두 */
+    /* 투두 목록 */
     .todo-input-bar {
       display: flex;
       gap: 6px;
@@ -414,6 +411,7 @@
       gap: 10px;
       flex: 1;
       min-width: 0;
+      cursor: pointer;
     }
     .todo-num-badge {
       display: inline-flex;
@@ -492,6 +490,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      cursor: pointer;
     }
     .btn-restore {
       background: #475569;
@@ -503,42 +502,29 @@
       cursor: pointer;
     }
 
-    /* 모달 */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.4);
-      z-index: 300;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(2px);
-    }
-    .modal-box {
-      background: white;
-      width: 90%;
-      max-width: 520px;
-      max-height: 85vh;
-      border-radius: 14px;
-      padding: 18px;
-      overflow-y: auto;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-    .modal-header {
+    /* 타임라인 뷰 리스트 */
+    .timeline-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
+      padding: 10px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13px;
     }
-    .close-btn {
-      background: none;
-      border: none;
-      font-size: 20px;
+    .timeline-row:hover { background: #f8fafc; border-radius: 6px; }
+    .timeline-movie-link {
+      color: #1e293b;
+      font-weight: 600;
       cursor: pointer;
-      color: var(--subtext);
+      text-decoration: none;
     }
+    .timeline-movie-link:hover { color: var(--primary); text-decoration: underline; }
+    .timeline-date-badge {
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
     .loading-bar {
       text-align: center;
       font-size: 12px;
@@ -553,13 +539,15 @@
 
 <div class="container">
 
-  <!-- 1. 상단 바 -->
+  <!-- 상단 네비게이션 바 -->
   <header>
     <div class="header-top">
       <div class="site-title" onclick="switchView('todo')">Park's All</div>
       <div class="nav-shortcuts">
-        <button class="icon-btn" onclick="openReleaseTimelineModal()" title="개봉일 타임라인">📅</button>
-        <button class="icon-btn" onclick="switchView('todo')" title="작업 순서 (스피너)">🎯</button>
+        <!-- 팝업 모달 대신 개봉일 타임라인 페이지로 직접 전환 -->
+        <button class="icon-btn" id="navBtnRelease" onclick="switchView('timeline')" title="개봉일 타임라인">📅</button>
+        <!-- 작업 순서 (To-Do)로 즉시 전환 -->
+        <button class="icon-btn active" id="navBtnTodo" onclick="switchView('todo')" title="작업 순서 (스피너)">🎯</button>
       </div>
     </div>
     <div class="search-wrapper">
@@ -579,7 +567,6 @@
 
       <div class="todo-input-bar">
         <input type="text" id="taskInput" placeholder="새 일 추가 (쉼표로 구분하여 여러 개 추가 가능)" onkeydown="if(event.key==='Enter') handleAddTasks()">
-        <!-- 글자 제외, 아이콘만 배치 -->
         <button class="btn-spin-action" onclick="shuffleCurrentTasks()" title="순서 재지정 (일괄 스핀)">🔀</button>
       </div>
 
@@ -601,26 +588,34 @@
     </div>
   </div>
 
-  <!-- 메인 2: 영화 상세 뷰 -->
+  <!-- 메인 2: 전체 개봉일 타임라인 뷰 (팝업 없애고 메인 화면으로 표시) -->
+  <div id="viewTimeline" style="display: none;">
+    <div class="card">
+      <div class="card-title">
+        <span>📅 개봉일 타임라인 (클릭 시 영화 상세)</span>
+        <button class="icon-btn" onclick="switchView('todo')" style="font-size:12px; padding:3px 8px;">닫기</button>
+      </div>
+      <div id="timelineFullContainer"></div>
+    </div>
+  </div>
+
+  <!-- 메인 3: 영화 상세 뷰 -->
   <div id="viewMovieDetail" style="display: none;">
     <div class="card">
       <div class="movie-detail-header">
         <div class="movie-detail-title-row">
           <div class="movie-title-left">
             <span class="movie-name" id="detailMovieTitle"></span>
-            <!-- 수정(÷), 삭제(×) -->
             <div class="movie-admin-actions">
               <button class="btn-action-icon" onclick="openEditMovieView()" title="영화 정보 수정">÷</button>
               <button class="btn-action-icon btn-action-del" onclick="handleDeleteMovie()" title="영화 삭제">×</button>
             </div>
-            <!-- 플랫폼 뱃지: 순수 아이콘만 -->
             <div id="platformBadgesArea" style="display:inline-flex; gap:4px; flex-wrap:wrap; margin-left:4px;"></div>
           </div>
         </div>
         <div class="movie-meta-row">
           <span>개봉일: <strong id="detailReleaseDateText">미정</strong></span>
-          <button class="meta-action-btn" onclick="openReleaseAroundCurrent()" title="이 영화 전후 개봉작 보기">📅 전후개봉</button>
-          <!-- 순서 토글 버튼 -->
+          <button class="meta-action-btn" onclick="switchView('timeline')" title="전체 개봉일 목록 보기">📅 개봉일목록</button>
           <button class="meta-action-btn" id="btnMovieTargetToggle" onclick="handleToggleMoviePriority()">🎯 순서에 추가</button>
         </div>
       </div>
@@ -630,7 +625,7 @@
       </div>
       <div id="movieReviewsArea"></div>
 
-      <!-- 개별 리뷰 추가 폼 -->
+      <!-- 리뷰 링크 추가 등록 -->
       <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border);">
         <div style="font-size: 12px; font-weight: 600; color:var(--subtext); margin-bottom: 6px;">+ 새 리뷰 링크 등록</div>
         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
@@ -643,7 +638,7 @@
     </div>
   </div>
 
-  <!-- 메인 3: 새 영화 등록 / 수정 폼 -->
+  <!-- 메인 4: 새 영화 등록 / 수정 폼 -->
   <div id="viewNewMovie" style="display: none;">
     <div class="card">
       <div class="card-title">
@@ -660,7 +655,6 @@
         <input type="date" id="newReleaseDate">
       </div>
 
-      <!-- 등록 시 순서 토글 -->
       <div class="target-toggle-wrap" onclick="toggleNewMovieTarget()">
         <span class="target-toggle-icon" id="targetToggleIcon">🎯</span>
         <span style="font-size: 13px; font-weight: 600;" id="targetToggleText">순서(스피너)에 포함 안 함</span>
@@ -695,7 +689,6 @@
         <input type="url" id="newKbsUrl" placeholder="KBS 기사 / 리뷰 URL">
       </div>
 
-      <!-- 매체별 리뷰 동시 추가 [+] 증식 행 -->
       <div style="margin: 16px 0 8px 0; font-size: 13px; font-weight: 700; color: var(--text);">
         📝 매체 리뷰 동시 추가
       </div>
@@ -714,17 +707,6 @@
 
 </div>
 
-<!-- 개봉일 타임라인 모달 -->
-<div class="modal-overlay" id="timelineModal" onclick="handleBackdropClick(event, 'timelineModal')">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3 style="font-size: 16px;" id="timelineModalTitle">📅 개봉일 타임라인</h3>
-      <button class="close-btn" onclick="closeModal('timelineModal')">✕</button>
-    </div>
-    <div id="timelineModalList"></div>
-  </div>
-</div>
-
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzzeY6T2kLpwzA-sOlwojt1_KPR2N3ekjqS0zPSlZ8UJ7XzsQ7GYTOohKf3-2_L3urR/exec";
 
@@ -736,9 +718,6 @@
   let editModeOriginalTitle = null;
 
   window.onload = function() {
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal('timelineModal');
-    });
     loadInitialData();
   };
 
@@ -748,8 +727,17 @@
 
   function switchView(viewName) {
     document.getElementById('viewTodo').style.display = viewName === 'todo' ? 'block' : 'none';
+    document.getElementById('viewTimeline').style.display = viewName === 'timeline' ? 'block' : 'none';
     document.getElementById('viewMovieDetail').style.display = viewName === 'detail' ? 'block' : 'none';
     document.getElementById('viewNewMovie').style.display = viewName === 'new' ? 'block' : 'none';
+
+    // 네비게이션 버튼 활성화 스타일 제어
+    document.getElementById('navBtnTodo').classList.toggle('active', viewName === 'todo');
+    document.getElementById('navBtnRelease').classList.toggle('active', viewName === 'timeline');
+
+    if (viewName === 'timeline') {
+      renderFullTimeline();
+    }
     if (viewName === 'todo') {
       document.getElementById('mainSearchInput').value = '';
     }
@@ -781,7 +769,7 @@
       });
   }
 
-  /* ================== 검색 & 영화 상세 ================== */
+  /* ================== 검색 & 상세 ================== */
   function executeSearch() {
     const query = document.getElementById('mainSearchInput').value.trim();
     if (!query) {
@@ -814,7 +802,7 @@
     document.getElementById('detailMovieTitle').innerText = movie["영화제목"];
     document.getElementById('detailReleaseDateText').innerText = movie["개봉일"] ? movie["개봉일"].substring(0, 10) : "미정";
 
-    // 1. 플랫폼 아이콘 배지 (텍스트 완전 제거, 순수 아이콘만)
+    // 1. 플랫폼 아이콘 배지
     const badgeContainer = document.getElementById('platformBadgesArea');
     badgeContainer.innerHTML = '';
 
@@ -840,10 +828,10 @@
       }
     });
 
-    // 2. 순서(스피너) 토글 버튼 상태 반영
+    // 2. 순서 토글 버튼 동기화
     updateMovieTargetButtonUI();
 
-    // 3. 매체별 리뷰 링크: [매체명] 기사제목 표출
+    // 3. 매체별 리뷰 링크: [매체명] 기사제목 표출[cite: 8]
     const reviewsArea = document.getElementById('movieReviewsArea');
     reviewsArea.innerHTML = '';
 
@@ -854,7 +842,6 @@
         const item = document.createElement('div');
         item.className = 'review-item';
         const mediaName = r["매체명"] ? `[${r["매체명"]}]` : '';
-        // 기사제목 우선 표출 (없을 경우에만 리뷰주소 대체)
         const titleText = (r["기사제목"] && r["기사제목"].trim() !== '') ? r["기사제목"] : (r["리뷰주소"] || '리뷰 링크');
         
         item.innerHTML = `
@@ -868,8 +855,9 @@
     }
   }
 
-  /* ================== 순서(스피너) 토글 처리 ================== */
+  /* ================== 순서 토글 판별 (완료된 작업은 순서 제외 판정) ================== */
   function isMovieInActiveTasks(title) {
+    // 오직 '진행 중(active)'인 상태만 순서에 포함된 것으로 간주
     return tasks.some(t => t.text === title && t.status === 'active');
   }
 
@@ -880,11 +868,11 @@
     if (isMovieInActiveTasks(currentMovie["영화제목"])) {
       btn.innerText = "🎯 순서 제거";
       btn.classList.add('active-target');
-      btn.title = "현재 순서(스피너)에 포함됨 - 클릭 시 제거";
+      btn.title = "현재 순서에 포함됨 (클릭 시 제거)";
     } else {
       btn.innerText = "🎯 순서에 추가";
       btn.classList.remove('active-target');
-      btn.title = "현재 순서에 없음 - 클릭 시 추가";
+      btn.title = "순서에 추가";
     }
   }
 
@@ -893,19 +881,17 @@
     const title = currentMovie["영화제목"];
 
     if (isMovieInActiveTasks(title)) {
-      // 이미 있으면 순서에서 제거
       tasks = tasks.filter(t => !(t.text === title && t.status === 'active'));
       renderTodoBoard();
       syncTodoServer();
       updateMovieTargetButtonUI();
     } else {
-      // 없으면 순서에 추가
       addTaskItem(title);
       updateMovieTargetButtonUI();
     }
   }
 
-  /* ================== 수정 (÷) & 삭제 (×) ================== */
+  /* ================== 영화 수정(÷) 및 삭제(×) ================== */
   function openEditMovieView() {
     if (!currentMovie) return;
     editModeOriginalTitle = currentMovie["영화제목"];
@@ -924,7 +910,6 @@
     document.getElementById('newKinoUrl').value = currentMovie["URL5"] || '';
     document.getElementById('newKbsUrl').value = currentMovie["URL6"] || '';
 
-    // 기존 등록 리뷰들 동적 로드
     const dynContainer = document.getElementById('dynamicReviewsContainer');
     dynContainer.innerHTML = '';
     if (currentReviews && currentReviews.length > 0) {
@@ -939,12 +924,10 @@
     updateTargetToggleUI();
   }
 
-  // 삭제 알림 및 확인창
   function handleDeleteMovie() {
     if (!currentMovie) return;
     const title = currentMovie["영화제목"];
     
-    // 명확한 삭제 확인 알림
     const confirmDelete = confirm(`⚠️ [삭제 확인]\n\n'${title}' 영화 정보를 정말 삭제하시겠습니까?\n등록된 리뷰 링크도 함께 삭제됩니다.`);
     if (!confirmDelete) return;
 
@@ -971,7 +954,7 @@
     });
   }
 
-  /* ================== 신규 등록 & 증식 행 ================== */
+  /* ================== 신규 등록 & 동적 증식 ================== */
   function openNewMovieView(prefillTitle) {
     editModeOriginalTitle = null;
     switchView('new');
@@ -1011,8 +994,7 @@
   }
 
   function addDynamicReviewRow() {
-    const dynContainer = document.getElementById('dynamicReviewsContainer');
-    dynContainer.appendChild(createDynamicRow('', '', '', false));
+    document.getElementById('dynamicReviewsContainer').appendChild(createDynamicRow('', '', '', false));
   }
 
   function toggleNewMovieTarget() {
@@ -1127,7 +1109,7 @@
     });
   }
 
-  /* ================== 스피너 / 투두 ================== */
+  /* ================== To-Do / 스피너 로직 ================== */
   function renderTodoBoard() {
     const listContainer = document.getElementById('todoListContainer');
     const keepContainer = document.getElementById('keepListContainer');
@@ -1150,7 +1132,7 @@
         const row = document.createElement('div');
         row.className = 'todo-row';
         row.innerHTML = `
-          <div class="todo-row-left">
+          <div class="todo-row-left" onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')">
             <span class="todo-num-badge">${idx + 1}</span>
             <span class="todo-text">${escapeHtml(t.text)}</span>
           </div>
@@ -1171,7 +1153,7 @@
         row.className = 'todo-row';
         row.style.border = '1px dashed #f59e0b';
         row.innerHTML = `
-          <div class="todo-row-left">
+          <div class="todo-row-left" onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')">
             <span class="todo-num-badge" style="background:#fef3c7; border-color:#fde68a; color:#b45309;">K</span>
             <span class="todo-text">${escapeHtml(t.text)}</span>
           </div>
@@ -1194,7 +1176,7 @@
         const row = document.createElement('div');
         row.className = 'done-row';
         row.innerHTML = `
-          <span class="done-text">✔ ${escapeHtml(t.text)}</span>
+          <span class="done-text" onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')">✔ ${escapeHtml(t.text)}</span>
           <div style="display:flex; gap:4px;">
             <button class="btn-restore" onclick="setTaskStatus('${t.id}', 'active')">되돌리기</button>
             <button class="todo-btn btn-del" style="width:24px; height:22px; font-size:10px;" onclick="deleteTask('${t.id}')">D</button>
@@ -1204,6 +1186,15 @@
       });
     } else {
       doneCard.style.display = 'none';
+    }
+  }
+
+  // 투두 항목 클릭 시 등록된 영화면 상세 화면으로 바로 이동
+  function goToMovieDetailIfMatches(taskText) {
+    const movie = allMovies.find(m => m["영화제목"] === taskText);
+    if (movie) {
+      document.getElementById('mainSearchInput').value = taskText;
+      executeSearch();
     }
   }
 
@@ -1267,6 +1258,7 @@
       target.status = newStatus;
       renderTodoBoard();
       syncTodoServer();
+      // 영화 상세 화면이 열려있거나 해당 영화의 버튼 상태가 즉시 토글되도록 갱신
       if (currentMovie) updateMovieTargetButtonUI();
     }
   }
@@ -1285,70 +1277,42 @@
     }).catch(e => console.error("동기화 실패:", e));
   }
 
-  /* ================== 개봉일 타임라인 ================== */
-  function openReleaseTimelineModal() {
-    document.getElementById('timelineModalTitle').innerText = "📅 전체 개봉일 타임라인";
-    populateTimeline(allMovies);
-    document.getElementById('timelineModal').style.display = 'flex';
-  }
+  /* ================== 전체 개봉일 타임라인 렌더링 ================== */
+  function renderFullTimeline() {
+    const container = document.getElementById('timelineFullContainer');
+    container.innerHTML = '';
 
-  function openReleaseAroundCurrent() {
-    if (!currentMovie) return;
-
-    // 개봉일 있는 영화들 기준 정렬
-    const sorted = [...allMovies]
-      .filter(m => m["개봉일"] && m["개봉일"].trim() !== '')
-      .sort((a, b) => String(a["개봉일"]).localeCompare(String(b["개봉일"])));
-
-    const curIdx = sorted.findIndex(m => m["영화제목"] === currentMovie["영화제목"]);
-
-    let filtered = sorted;
-    if (curIdx !== -1) {
-      const start = Math.max(0, curIdx - 4);
-      const end = Math.min(sorted.length, curIdx + 5);
-      filtered = sorted.slice(start, end);
-    }
-
-    document.getElementById('timelineModalTitle').innerText = `📅 [${currentMovie["영화제목"]}] 기준 전후 개봉작`;
-    populateTimeline(filtered, currentMovie["영화제목"]);
-    document.getElementById('timelineModal').style.display = 'flex';
-  }
-
-  function populateTimeline(list, highlightTitle) {
-    const listArea = document.getElementById('timelineModalList');
-    listArea.innerHTML = '';
-
-    if (!list || list.length === 0) {
-      listArea.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">개봉일 정보가 없습니다.</div>';
+    if (!allMovies || allMovies.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">개봉일 정보가 없습니다.</div>';
       return;
     }
 
-    list.forEach(m => {
-      const isCur = m["영화제목"] === highlightTitle;
+    // 개봉일 오름차순 정렬
+    const sorted = [...allMovies].sort((a, b) => {
+      const da = a["개봉일"] || '';
+      const db = b["개봉일"] || '';
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return String(da).localeCompare(String(db));
+    });
+
+    sorted.forEach(m => {
       const row = document.createElement('div');
-      row.style.cssText = `display:flex; justify-content:space-between; align-items:center; padding:9px 8px; border-bottom:1px solid #f1f5f9; font-size:13px; ${isCur ? 'background:#eff6ff; font-weight:bold; border-radius:6px;' : ''}`;
+      row.className = 'timeline-row';
       row.innerHTML = `
-        <span style="color:${isCur ? 'var(--primary)' : '#1e293b'}; cursor:pointer;" onclick="selectFromTimeline('${escapeHtml(m["영화제목"])}')">
-          ${isCur ? '👉 ' : ''}${escapeHtml(m["영화제목"])}
+        <span class="timeline-movie-link" onclick="openMovieFromTimeline('${escapeHtml(m["영화제목"])}')">
+          🎬 ${escapeHtml(m["영화제목"])}
         </span>
-        <span style="color:#ef4444; font-size:12px; font-weight:600;">${m["개봉일"] ? m["개봉일"].substring(0, 10) : '미정'}</span>
+        <span class="timeline-date-badge">${m["개봉일"] ? m["개봉일"].substring(0, 10) : '미정'}</span>
       `;
-      listArea.appendChild(row);
+      container.appendChild(row);
     });
   }
 
-  function selectFromTimeline(title) {
-    closeModal('timelineModal');
+  function openMovieFromTimeline(title) {
     document.getElementById('mainSearchInput').value = title;
     executeSearch();
-  }
-
-  function closeModal(id) {
-    document.getElementById(id).style.display = 'none';
-  }
-
-  function handleBackdropClick(e, id) {
-    if (e.target.id === id) closeModal(id);
   }
 
   function escapeHtml(str) {
