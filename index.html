@@ -175,10 +175,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 28px;
-      height: 26px;
+      width: 26px;
+      height: 24px;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 13px;
       text-decoration: none;
       cursor: pointer;
       border: 1px solid transparent;
@@ -498,25 +498,27 @@
       margin-bottom: 8px;
     }
 
-    .done-section {
-      margin-top: 14px;
-      background: #f8fafc;
-      border-radius: 10px;
-      padding: 12px;
-      border: 1px solid var(--border);
-    }
-    .done-row {
+    /* 창고 (작업 완료) */
+    .archive-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 0;
+      padding: 9px 8px;
       border-bottom: 1px solid #edf2f7;
-      font-size: 12px;
+      font-size: 13px;
     }
-    .done-row:last-child { border-bottom: none; }
-    .done-text {
-      text-decoration: line-through;
-      color: #94a3b8;
+    .archive-row:hover { background: #f8fafc; border-radius: 6px; }
+    .archive-row-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .archive-text {
+      color: #334155;
+      font-weight: 500;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -525,10 +527,30 @@
       background: #475569;
       color: white;
       border: none;
-      padding: 3px 7px;
+      padding: 4px 8px;
       border-radius: 4px;
       font-size: 11px;
       cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-restore:hover { background: #334155; }
+
+    .btn-load-more {
+      width: 100%;
+      padding: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--subtext);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+    .btn-load-more:hover {
+      background: #f1f5f9;
+      color: var(--text);
     }
 
     /* 타임라인 뷰 리스트 */
@@ -553,6 +575,17 @@
       font-size: 12px;
       font-weight: 700;
     }
+    .timeline-today-divider {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin: 10px 0;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+    }
 
     .loading-bar {
       text-align: center;
@@ -575,6 +608,7 @@
       <div class="nav-shortcuts">
         <button class="icon-btn" id="navBtnRelease" onclick="switchView('timeline')" title="개봉일 타임라인">📅</button>
         <button class="icon-btn active" id="navBtnTodo" onclick="switchView('todo')" title="작업 순서 (스피너)">🎯</button>
+        <button class="icon-btn" id="navBtnArchive" onclick="switchView('archive')" title="작업완료 창고">📦</button>
       </div>
     </div>
     <div class="search-wrapper">
@@ -606,28 +640,39 @@
         <div id="keepListContainer" class="todo-list-container"></div>
       </div>
     </div>
+  </div>
 
-    <!-- 작업 완료 -->
-    <div class="card done-section" id="doneSectionCard" style="display:none;">
-      <div class="card-title" style="font-size: 14px; margin-bottom: 8px;">
-        <span>✅ 작업 완료 (<span id="doneCount">0</span>개)</span>
+  <!-- 메인 2: 작업완료 창고 뷰 -->
+  <div id="viewArchive" style="display: none;">
+    <div class="card">
+      <div class="card-title">
+        <span>📦 작업완료 창고 (<span id="archiveTotalCount">0</span>)</span>
+        <button class="icon-btn" onclick="switchView('todo')" style="font-size:12px; padding:3px 8px;">닫기</button>
       </div>
-      <div id="doneListContainer"></div>
+      <div id="archiveListContainer"></div>
+      <button id="btnArchiveLoadMore" class="btn-load-more" onclick="loadMoreArchive()" style="display:none;">더보기 (+10)</button>
     </div>
   </div>
 
-  <!-- 메인 2: 전체 개봉일 타임라인 뷰 -->
+  <!-- 메인 3: 전체 개봉일 타임라인 뷰 -->
   <div id="viewTimeline" style="display: none;">
     <div class="card">
       <div class="card-title">
         <span>📅 개봉일 타임라인 (클릭 시 영화 상세)</span>
         <button class="icon-btn" onclick="switchView('todo')" style="font-size:12px; padding:3px 8px;">닫기</button>
       </div>
-      <div id="timelineFullContainer"></div>
+
+      <button id="btnTimelinePrev" class="btn-load-more" onclick="loadPrevTimeline()" style="margin-bottom:8px; display:none;">▲ 이전 개봉작 더보기 (-5)</button>
+      
+      <div id="timelinePastContainer"></div>
+      <div id="timelineTodayDivider" class="timeline-today-divider">📍 오늘 기준 (Today)</div>
+      <div id="timelineFutureContainer"></div>
+
+      <button id="btnTimelineNext" class="btn-load-more" onclick="loadNextTimeline()" style="margin-top:8px; display:none;">▼ 이후 개봉작 더보기 (+5)</button>
     </div>
   </div>
 
-  <!-- 메인 3: 영화 상세 뷰 -->
+  <!-- 메인 4: 영화 상세 뷰 -->
   <div id="viewMovieDetail" style="display: none;">
     <div class="card">
       <div class="movie-detail-header">
@@ -666,7 +711,7 @@
     </div>
   </div>
 
-  <!-- 메인 4: 새 영화 등록 / 수정 폼 -->
+  <!-- 메인 5: 새 영화 등록 / 수정 폼 -->
   <div id="viewNewMovie" style="display: none;">
     <div class="card">
       <div class="card-title">
@@ -739,6 +784,11 @@
   let isNewMovieTargetActive = false;
   let editModeOriginalTitle = null;
 
+  // 페이징 관리 변수
+  let archivePageSize = 10;
+  let timelinePastCount = 5;
+  let timelineFutureCount = 5;
+
   window.onload = function() {
     loadInitialData();
   };
@@ -749,14 +799,22 @@
 
   function switchView(viewName) {
     document.getElementById('viewTodo').style.display = viewName === 'todo' ? 'block' : 'none';
+    document.getElementById('viewArchive').style.display = viewName === 'archive' ? 'block' : 'none';
     document.getElementById('viewTimeline').style.display = viewName === 'timeline' ? 'block' : 'none';
     document.getElementById('viewMovieDetail').style.display = viewName === 'detail' ? 'block' : 'none';
     document.getElementById('viewNewMovie').style.display = viewName === 'new' ? 'block' : 'none';
 
     document.getElementById('navBtnTodo').classList.toggle('active', viewName === 'todo');
+    document.getElementById('navBtnArchive').classList.toggle('active', viewName === 'archive');
     document.getElementById('navBtnRelease').classList.toggle('active', viewName === 'timeline');
 
+    if (viewName === 'archive') {
+      archivePageSize = 10;
+      renderArchiveView();
+    }
     if (viewName === 'timeline') {
+      timelinePastCount = 5;
+      timelineFutureCount = 5;
       renderFullTimeline();
     }
     if (viewName === 'todo') {
@@ -815,7 +873,6 @@
       });
   }
 
-  // 리뷰 객체에서 기사 제목을 안전하게 추출하는 헬퍼 함수
   function extractReviewTitle(r) {
     if (!r) return '';
     return r["기사제목"] || r["글제목"] || r["제목"] || r["title"] || '';
@@ -831,18 +888,8 @@
     return r["리뷰주소"] || r["URL"] || r["url"] || '';
   }
 
-  function showMovieDetail(movie, reviews) {
-    currentMovie = movie;
-    currentReviews = reviews || [];
-    switchView('detail');
-
-    document.getElementById('detailMovieTitle').innerText = movie["영화제목"];
-    document.getElementById('detailReleaseDateText').innerText = movie["개봉일"] ? movie["개봉일"].substring(0, 10) : "미정";
-
-    // 1. 플랫폼 아이콘 배지
-    const badgeContainer = document.getElementById('platformBadgesArea');
-    badgeContainer.innerHTML = '';
-
+  function getPlatformBadgesHTML(movie, size = 'default') {
+    if (!movie) return '';
     const badges = [
       { key: "URL1", icon: "🌐", title: "구글 정보", class: "badge-google", defaultUrl: `https://www.google.com/search?q=${encodeURIComponent(movie["영화제목"])}` },
       { key: "URL2", icon: "⭐", title: "구글 관람평/리뷰", class: "badge-greview", defaultUrl: `https://www.google.com/search?q=${encodeURIComponent(movie["영화제목"] + " 리뷰")}` },
@@ -852,23 +899,31 @@
       { key: "URL6", icon: "📺", title: "KBS 기사/리뷰", class: "badge-kbs", defaultUrl: movie["URL6"] }
     ];
 
+    let html = '';
     badges.forEach(b => {
       const link = movie[b.key] || b.defaultUrl;
       if (link) {
-        const a = document.createElement('a');
-        a.className = `badge-icon ${b.class}`;
-        a.href = link;
-        a.target = '_blank';
-        a.innerText = b.icon;
-        a.title = b.title;
-        badgeContainer.appendChild(a);
+        const style = size === 'small' ? 'width:22px; height:20px; font-size:11px;' : '';
+        html += `<a href="${link}" target="_blank" class="badge-icon ${b.class}" style="${style}" title="${b.title}" onclick="event.stopPropagation()">${b.icon}</a>`;
       }
     });
+    return html;
+  }
 
-    // 2. 순서 버튼 상태 동기화
+  function showMovieDetail(movie, reviews) {
+    currentMovie = movie;
+    currentReviews = reviews || [];
+    switchView('detail');
+
+    document.getElementById('detailMovieTitle').innerText = movie["영화제목"];
+    document.getElementById('detailReleaseDateText').innerText = movie["개봉일"] ? movie["개봉일"].substring(0, 10) : "미정";
+
+    // 플랫폼 배지 생성
+    const badgeContainer = document.getElementById('platformBadgesArea');
+    badgeContainer.innerHTML = getPlatformBadgesHTML(movie);
+
     updateMovieTargetButtonUI();
 
-    // 3. 매체별 리뷰 링크
     const reviewsArea = document.getElementById('movieReviewsArea');
     reviewsArea.innerHTML = '';
 
@@ -927,7 +982,7 @@
     }
   }
 
-  /* ================== 영화 수정(÷) 및 삭제(×) ================== */
+  /* ================== 영화 수정 & 삭제 ================== */
   function openEditMovieView() {
     if (!currentMovie) return;
     editModeOriginalTitle = currentMovie["영화제목"];
@@ -993,7 +1048,6 @@
     });
   }
 
-  /* ================== 신규 등록 & 동적 증식 / 순서 이동 ================== */
   function openNewMovieView(prefillTitle) {
     editModeOriginalTitle = null;
     switchView('new');
@@ -1018,7 +1072,6 @@
     updateTargetToggleUI();
   }
 
-  // 동적 행 생성 (위/아래 이동 및 확인 후 삭제 버튼 적용)
   function createDynamicRow(mediaVal, titleVal, urlVal) {
     const row = document.createElement('div');
     row.className = 'review-dynamic-row';
@@ -1071,7 +1124,6 @@
     if (confirm(`[${displayLabel}] 리뷰 항목을 삭제하시겠습니까?`)) {
       const container = document.getElementById('dynamicReviewsContainer');
       if (container.querySelectorAll('.review-dynamic-row').length <= 1) {
-        // 행이 하나뿐일 때는 지우지 않고 입력값만 리셋
         row.querySelector('.dyn-media').value = '';
         row.querySelector('.dyn-title').value = '';
         row.querySelector('.dyn-url').value = '';
@@ -1121,11 +1173,7 @@
       const m = r.querySelector('.dyn-media').value.trim();
       const t = r.querySelector('.dyn-title').value.trim();
       if (u || m || t) {
-        multiReviews.push({
-          media: m,
-          title: t,
-          url: u
-        });
+        multiReviews.push({ media: m, title: t, url: u });
       }
     });
 
@@ -1193,24 +1241,24 @@
   }
 
   /* ================== To-Do / 스피너 로직 ================== */
+  function findMovieData(title) {
+    return allMovies.find(m => m["영화제목"] === title);
+  }
+
   function isKnownMovie(title) {
-    return allMovies.some(m => m["영화제목"] === title);
+    return !!findMovieData(title);
   }
 
   function renderTodoBoard() {
     const listContainer = document.getElementById('todoListContainer');
     const keepContainer = document.getElementById('keepListContainer');
-    const doneContainer = document.getElementById('doneListContainer');
     const keepSection = document.getElementById('keepSection');
-    const doneCard = document.getElementById('doneSectionCard');
 
     listContainer.innerHTML = '';
     keepContainer.innerHTML = '';
-    doneContainer.innerHTML = '';
 
     const activeTasks = tasks.filter(t => t.status === 'active');
     const keepTasks = tasks.filter(t => t.status === 'keep');
-    const doneTasks = tasks.filter(t => t.status === 'done');
 
     if (activeTasks.length === 0) {
       listContainer.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px 0; font-size:13px;">진행 중인 작업이 없습니다.</div>';
@@ -1229,7 +1277,7 @@
             <span class="todo-text">${escapeHtml(t.text)}</span>
           </div>
           <div class="todo-btn-group">
-            <button class="todo-btn btn-done" onclick="setTaskStatus('${t.id}', 'done')" title="완료">完</button>
+            <button class="todo-btn btn-done" onclick="setTaskStatus('${t.id}', 'done')" title="완료(창고행)">完</button>
             <button class="todo-btn btn-del" onclick="deleteTask('${t.id}')" title="삭제">D</button>
             <button class="todo-btn btn-keep" onclick="setTaskStatus('${t.id}', 'keep')" title="키핑">K</button>
           </div>
@@ -1254,7 +1302,7 @@
             <span class="todo-text">${escapeHtml(t.text)}</span>
           </div>
           <div class="todo-btn-group">
-            <button class="todo-btn btn-done" onclick="setTaskStatus('${t.id}', 'done')" title="완료">完</button>
+            <button class="todo-btn btn-done" onclick="setTaskStatus('${t.id}', 'done')" title="완료(창고행)">完</button>
             <button class="todo-btn btn-del" onclick="deleteTask('${t.id}')" title="삭제">D</button>
             <button class="todo-btn" style="background:#64748b;" onclick="setTaskStatus('${t.id}', 'active')" title="보관 해제">↑</button>
           </div>
@@ -1264,29 +1312,71 @@
     } else {
       keepSection.style.display = 'none';
     }
+  }
 
-    if (doneTasks.length > 0) {
-      doneCard.style.display = 'block';
-      document.getElementById('doneCount').innerText = doneTasks.length;
-      doneTasks.forEach(t => {
-        const isMovie = isKnownMovie(t.text);
-        const clickAttr = isMovie ? `onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')"` : '';
-        const cursorStyle = isMovie ? 'cursor:pointer;' : 'cursor:default;';
+  /* ================== 창고 (작업 완료) 로직 ================== */
+  function renderArchiveView() {
+    const container = document.getElementById('archiveListContainer');
+    const totalCountSpan = document.getElementById('archiveTotalCount');
+    const loadMoreBtn = document.getElementById('btnArchiveLoadMore');
 
-        const row = document.createElement('div');
-        row.className = 'done-row';
-        row.innerHTML = `
-          <span class="done-text" style="${cursorStyle}" ${clickAttr}>✔ ${escapeHtml(t.text)}</span>
-          <div style="display:flex; gap:4px;">
-            <button class="btn-restore" onclick="setTaskStatus('${t.id}', 'active')">되돌리기</button>
-            <button class="todo-btn btn-del" style="width:24px; height:22px; font-size:10px;" onclick="deleteTask('${t.id}')">D</button>
-          </div>
-        `;
-        doneContainer.appendChild(row);
-      });
-    } else {
-      doneCard.style.display = 'none';
+    container.innerHTML = '';
+
+    const doneTasks = tasks.filter(t => t.status === 'done');
+    totalCountSpan.innerText = doneTasks.length;
+
+    if (doneTasks.length === 0) {
+      container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:30px 0; font-size:13px;">창고에 보관된 작업이 없습니다.</div>';
+      loadMoreBtn.style.display = 'none';
+      return;
     }
+
+    // 영/숫자/가나다(한글) 정렬
+    const sortedDone = [...doneTasks].sort((a, b) => {
+      return a.text.localeCompare(b.text, 'ko', { numeric: true, sensitivity: 'base' });
+    });
+
+    const displayList = sortedDone.slice(0, archivePageSize);
+
+    displayList.forEach(t => {
+      const movieData = findMovieData(t.text);
+      const isMovie = !!movieData;
+      const clickableClass = isMovie ? 'todo-row-clickable' : '';
+      const clickAttr = isMovie ? `onclick="goToMovieDetailIfMatches('${escapeHtml(t.text)}')"` : '';
+
+      // 등록된 영화인 경우 아이콘 배지 추출 (크기 축소)
+      let badgesHtml = '';
+      if (isMovie) {
+        badgesHtml = `<span style="display:inline-flex; gap:3px; margin-left:4px;">${getPlatformBadgesHTML(movieData, 'small')}</span>`;
+      }
+
+      const row = document.createElement('div');
+      row.className = 'archive-row';
+      row.innerHTML = `
+        <div class="archive-row-left ${clickableClass}" ${clickAttr}>
+          <span style="color:var(--green); font-size:12px; margin-right:4px;">✔</span>
+          <span class="archive-text">${escapeHtml(t.text)}</span>
+          ${badgesHtml}
+        </div>
+        <div style="display:flex; gap:4px; flex-shrink:0; margin-left:8px;">
+          <button class="btn-restore" onclick="setTaskStatus('${t.id}', 'active')">되돌리기</button>
+          <button class="todo-btn btn-del" style="width:24px; height:24px; font-size:10px;" onclick="deleteTask('${t.id}')">D</button>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+
+    // 10개 단위 더보기 노출 여부
+    if (sortedDone.length > archivePageSize) {
+      loadMoreBtn.style.display = 'block';
+    } else {
+      loadMoreBtn.style.display = 'none';
+    }
+  }
+
+  function loadMoreArchive() {
+    archivePageSize += 10;
+    renderArchiveView();
   }
 
   function goToMovieDetailIfMatches(taskText) {
@@ -1360,6 +1450,9 @@
     if (target) {
       target.status = newStatus;
       renderTodoBoard();
+      if (document.getElementById('viewArchive').style.display === 'block') {
+        renderArchiveView();
+      }
       syncTodoServer();
       if (currentMovie) updateMovieTargetButtonUI();
     }
@@ -1368,6 +1461,9 @@
   function deleteTask(id) {
     tasks = tasks.filter(t => t.id !== id);
     renderTodoBoard();
+    if (document.getElementById('viewArchive').style.display === 'block') {
+      renderArchiveView();
+    }
     syncTodoServer();
     if (currentMovie) updateMovieTargetButtonUI();
   }
@@ -1379,36 +1475,88 @@
     }).catch(e => console.error("동기화 실패:", e));
   }
 
-  /* ================== 전체 개봉일 타임라인 렌더링 ================== */
+  /* ================== 오늘 기준 개봉일 타임라인 로직 ================== */
   function renderFullTimeline() {
-    const container = document.getElementById('timelineFullContainer');
-    container.innerHTML = '';
+    const pastContainer = document.getElementById('timelinePastContainer');
+    const futureContainer = document.getElementById('timelineFutureContainer');
+    const prevBtn = document.getElementById('btnTimelinePrev');
+    const nextBtn = document.getElementById('btnTimelineNext');
+
+    pastContainer.innerHTML = '';
+    futureContainer.innerHTML = '';
 
     if (!allMovies || allMovies.length === 0) {
-      container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">개봉일 정보가 없습니다.</div>';
+      pastContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">개봉일 정보가 없습니다.</div>';
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
       return;
     }
 
+    // 날짜 오름차순 정렬
     const sorted = [...allMovies].sort((a, b) => {
-      const da = a["개봉일"] || '';
-      const db = b["개봉일"] || '';
+      const da = a["개봉일"] ? a["개봉일"].substring(0, 10) : '';
+      const db = b["개봉일"] ? b["개봉일"].substring(0, 10) : '';
       if (!da && !db) return 0;
       if (!da) return 1;
       if (!db) return -1;
-      return String(da).localeCompare(String(db));
+      return da.localeCompare(db);
     });
 
+    // 오늘 날짜 문자열 (YYYY-MM-DD)
+    const today = new Date().toISOString().substring(0, 10);
+
+    const pastList = [];
+    const futureList = [];
+
     sorted.forEach(m => {
-      const row = document.createElement('div');
-      row.className = 'timeline-row';
-      row.innerHTML = `
-        <span class="timeline-movie-link" onclick="openMovieFromTimeline('${escapeHtml(m["영화제목"])}')">
-          🎬 ${escapeHtml(m["영화제목"])}
-        </span>
-        <span class="timeline-date-badge">${m["개봉일"] ? m["개봉일"].substring(0, 10) : '미정'}</span>
-      `;
-      container.appendChild(row);
+      const d = m["개봉일"] ? m["개봉일"].substring(0, 10) : '';
+      if (d && d < today) {
+        pastList.push(m);
+      } else {
+        futureList.push(m);
+      }
     });
+
+    // 오늘 기준 과거 N개 (최신 과거순)
+    const visiblePast = pastList.slice(Math.max(0, pastList.length - timelinePastCount));
+    // 오늘 기준 미래 N개
+    const visibleFuture = futureList.slice(0, timelineFutureCount);
+
+    // 과거 렌더링
+    visiblePast.forEach(m => {
+      pastContainer.appendChild(createTimelineRowElement(m));
+    });
+
+    // 미래 렌더링
+    visibleFuture.forEach(m => {
+      futureContainer.appendChild(createTimelineRowElement(m));
+    });
+
+    // 버튼 표시 제어
+    prevBtn.style.display = pastList.length > timelinePastCount ? 'block' : 'none';
+    nextBtn.style.display = futureList.length > timelineFutureCount ? 'block' : 'none';
+  }
+
+  function createTimelineRowElement(m) {
+    const row = document.createElement('div');
+    row.className = 'timeline-row';
+    row.innerHTML = `
+      <span class="timeline-movie-link" onclick="openMovieFromTimeline('${escapeHtml(m["영화제목"])}')">
+        🎬 ${escapeHtml(m["영화제목"])}
+      </span>
+      <span class="timeline-date-badge">${m["개봉일"] ? m["개봉일"].substring(0, 10) : '미정'}</span>
+    `;
+    return row;
+  }
+
+  function loadPrevTimeline() {
+    timelinePastCount += 5;
+    renderFullTimeline();
+  }
+
+  function loadNextTimeline() {
+    timelineFutureCount += 5;
+    renderFullTimeline();
   }
 
   function openMovieFromTimeline(title) {
