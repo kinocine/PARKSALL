@@ -316,6 +316,7 @@
     }
     .target-toggle-icon.active { filter: grayscale(0%); }
 
+    /* 매체 리뷰 동적 행 스타일 */
     .review-dynamic-row {
       display: flex;
       gap: 4px;
@@ -330,22 +331,30 @@
       outline: none;
     }
     .review-dynamic-row input:focus { border-color: var(--primary); }
+    .dyn-row-btns {
+      display: flex;
+      gap: 2px;
+      flex-shrink: 0;
+    }
     .btn-circle-action {
-      width: 28px;
+      width: 24px;
       height: 28px;
-      border-radius: 6px;
+      border-radius: 5px;
       border: 1px solid var(--border);
       background: #ffffff;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: bold;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
+      padding: 0;
+      transition: background 0.15s;
     }
+    .btn-circle-action:hover { background: #f1f5f9; }
     .btn-circle-add { color: var(--primary); border-color: #bfdbfe; background: #eff6ff; }
     .btn-circle-del { color: var(--red); border-color: #fecaca; background: #fef2f2; }
+    .btn-circle-move { color: #475569; font-size: 10px; }
 
     .btn-submit-main {
       width: 100%;
@@ -583,7 +592,6 @@
         <span>🎯 Task Priority To-Do List</span>
       </div>
 
-      <!-- 새 일 추가 & 스핀 입력창 -->
       <div class="todo-input-bar">
         <input type="text" id="taskInput" placeholder="새 일 추가 (쉼표로 구분 가능)" onkeydown="if(event.key==='Enter') handleAddTasks()">
         <button class="btn-add-action" onclick="handleAddTasks()" title="추가">➕</button>
@@ -635,7 +643,6 @@
         </div>
         <div class="movie-meta-row">
           <span>개봉일: <strong id="detailReleaseDateText">미정</strong></span>
-          <!-- 글자를 빼고 아이콘 전용 버튼으로 구성 -->
           <button class="meta-action-btn" onclick="switchView('timeline')" title="개봉일 목록">📅</button>
           <button class="meta-action-btn" id="btnMovieTargetToggle" onclick="handleToggleMoviePriority()" title="순서 추가/삭제">🎯</button>
         </div>
@@ -650,7 +657,7 @@
       <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border);">
         <div style="font-size: 12px; font-weight: 600; color:var(--subtext); margin-bottom: 6px;">+ 새 리뷰 링크 등록</div>
         <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-          <input type="text" id="addReviewMedia" placeholder="매체명 (예: 네이버.박재환, KBS)" style="width: 35%; padding: 7px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px;">
+          <input type="text" id="addReviewMedia" placeholder="매체명 (예: 로저 에버, KBS)" style="width: 35%; padding: 7px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px;">
           <input type="text" id="addReviewTitle" placeholder="기사/글 제목" style="flex: 1; padding: 7px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px;">
         </div>
         <input type="url" id="addReviewUrl" placeholder="리뷰 주소 (https://...)" style="width: 100%; padding: 7px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; margin-bottom: 6px;">
@@ -710,17 +717,11 @@
         <input type="url" id="newKbsUrl" placeholder="KBS 기사 / 리뷰 URL">
       </div>
 
-      <div style="margin: 16px 0 8px 0; font-size: 13px; font-weight: 700; color: var(--text);">
-        📝 매체 리뷰 동시 추가
+      <div style="display:flex; justify-content:space-between; align-items:center; margin: 16px 0 8px 0;">
+        <span style="font-size: 13px; font-weight: 700; color: var(--text);">📝 매체 리뷰 동시 추가 / 순서 편집</span>
+        <button type="button" class="icon-btn" onclick="addDynamicReviewRow()" style="font-size:11px; padding:3px 8px;">+ 행 추가</button>
       </div>
-      <div id="dynamicReviewsContainer">
-        <div class="review-dynamic-row">
-          <input type="text" placeholder="매체명" class="dyn-media" style="width: 25%;">
-          <input type="text" placeholder="기사제목" class="dyn-title" style="width: 35%;">
-          <input type="url" placeholder="URL" class="dyn-url" style="flex: 1;">
-          <button type="button" class="btn-circle-action btn-circle-add" onclick="addDynamicReviewRow()">+</button>
-        </div>
-      </div>
+      <div id="dynamicReviewsContainer"></div>
 
       <button class="btn-submit-main" id="btnSubmitMovieForm" onclick="handleSubmitNewMovie()">영화 등록 완료</button>
     </div>
@@ -814,6 +815,22 @@
       });
   }
 
+  // 리뷰 객체에서 기사 제목을 안전하게 추출하는 헬퍼 함수
+  function extractReviewTitle(r) {
+    if (!r) return '';
+    return r["기사제목"] || r["글제목"] || r["제목"] || r["title"] || '';
+  }
+
+  function extractReviewMedia(r) {
+    if (!r) return '';
+    return r["매체명"] || r["매체"] || r["media"] || '';
+  }
+
+  function extractReviewUrl(r) {
+    if (!r) return '';
+    return r["리뷰주소"] || r["URL"] || r["url"] || '';
+  }
+
   function showMovieDetail(movie, reviews) {
     currentMovie = movie;
     currentReviews = reviews || [];
@@ -861,12 +878,15 @@
       reviews.forEach(r => {
         const item = document.createElement('div');
         item.className = 'review-item';
-        const mediaName = r["매체명"] ? `[${r["매체명"]}]` : '';
-        const titleText = (r["기사제목"] && r["기사제목"].trim() !== '') ? r["기사제목"] : (r["리뷰주소"] || '리뷰 링크');
+        const media = extractReviewMedia(r);
+        const titleText = extractReviewTitle(r);
+        const urlText = extractReviewUrl(r);
+        const mediaName = media ? `[${media}]` : '';
+        const displayText = titleText ? titleText : urlText;
         
         item.innerHTML = `
-          <a href="${r["리뷰주소"]}" target="_blank">
-            <span class="review-media-tag">${escapeHtml(mediaName)}</span>${escapeHtml(titleText)}
+          <a href="${urlText}" target="_blank">
+            <span class="review-media-tag">${escapeHtml(mediaName)}</span>${escapeHtml(displayText)}
           </a>
           <span style="font-size:11px; color:#94a3b8; flex-shrink:0;">${r["작성일"] ? r["작성일"].substring(0, 10) : ''}</span>
         `;
@@ -929,11 +949,14 @@
     const dynContainer = document.getElementById('dynamicReviewsContainer');
     dynContainer.innerHTML = '';
     if (currentReviews && currentReviews.length > 0) {
-      currentReviews.forEach((r, idx) => {
-        dynContainer.appendChild(createDynamicRow(r["매체명"] || '', r["기사제목"] || '', r["리뷰주소"] || '', idx === 0));
+      currentReviews.forEach((r) => {
+        const m = extractReviewMedia(r);
+        const t = extractReviewTitle(r);
+        const u = extractReviewUrl(r);
+        dynContainer.appendChild(createDynamicRow(m, t, u));
       });
     } else {
-      dynContainer.appendChild(createDynamicRow('', '', '', true));
+      dynContainer.appendChild(createDynamicRow('', '', ''));
     }
 
     isNewMovieTargetActive = isMovieInActiveTasks(currentMovie["영화제목"]);
@@ -970,7 +993,7 @@
     });
   }
 
-  /* ================== 신규 등록 & 동적 증식 ================== */
+  /* ================== 신규 등록 & 동적 증식 / 순서 이동 ================== */
   function openNewMovieView(prefillTitle) {
     editModeOriginalTitle = null;
     switchView('new');
@@ -989,28 +1012,73 @@
 
     const dynContainer = document.getElementById('dynamicReviewsContainer');
     dynContainer.innerHTML = '';
-    dynContainer.appendChild(createDynamicRow('', '', '', true));
+    dynContainer.appendChild(createDynamicRow('', '', ''));
 
     isNewMovieTargetActive = false;
     updateTargetToggleUI();
   }
 
-  function createDynamicRow(mediaVal, titleVal, urlVal, isFirst) {
+  // 동적 행 생성 (위/아래 이동 및 확인 후 삭제 버튼 적용)
+  function createDynamicRow(mediaVal, titleVal, urlVal) {
     const row = document.createElement('div');
     row.className = 'review-dynamic-row';
     row.innerHTML = `
       <input type="text" placeholder="매체명" class="dyn-media" value="${escapeHtml(mediaVal)}" style="width: 25%;">
       <input type="text" placeholder="기사제목" class="dyn-title" value="${escapeHtml(titleVal)}" style="width: 35%;">
       <input type="url" placeholder="URL" class="dyn-url" value="${escapeHtml(urlVal)}" style="flex: 1;">
-      ${isFirst 
-        ? `<button type="button" class="btn-circle-action btn-circle-add" onclick="addDynamicReviewRow()">+</button>` 
-        : `<button type="button" class="btn-circle-action btn-circle-del" onclick="this.parentElement.remove()">-</button>`}
+      <div class="dyn-row-btns">
+        <button type="button" class="btn-circle-action btn-circle-move" onclick="moveRowUp(this)" title="위로 이동">▲</button>
+        <button type="button" class="btn-circle-action btn-circle-move" onclick="moveRowDown(this)" title="아래로 이동">▼</button>
+        <button type="button" class="btn-circle-action btn-circle-add" onclick="insertRowAfter(this)" title="아래에 행 추가">+</button>
+        <button type="button" class="btn-circle-action btn-circle-del" onclick="confirmDeleteRow(this)" title="삭제">×</button>
+      </div>
     `;
     return row;
   }
 
   function addDynamicReviewRow() {
-    document.getElementById('dynamicReviewsContainer').appendChild(createDynamicRow('', '', '', false));
+    document.getElementById('dynamicReviewsContainer').appendChild(createDynamicRow('', '', ''));
+  }
+
+  function insertRowAfter(btn) {
+    const currentRow = btn.closest('.review-dynamic-row');
+    const newRow = createDynamicRow('', '', '');
+    currentRow.parentNode.insertBefore(newRow, currentRow.nextSibling);
+  }
+
+  function moveRowUp(btn) {
+    const currentRow = btn.closest('.review-dynamic-row');
+    const prevRow = currentRow.previousElementSibling;
+    if (prevRow) {
+      currentRow.parentNode.insertBefore(currentRow, prevRow);
+    }
+  }
+
+  function moveRowDown(btn) {
+    const currentRow = btn.closest('.review-dynamic-row');
+    const nextRow = currentRow.nextElementSibling;
+    if (nextRow) {
+      currentRow.parentNode.insertBefore(nextRow, currentRow);
+    }
+  }
+
+  function confirmDeleteRow(btn) {
+    const row = btn.closest('.review-dynamic-row');
+    const media = row.querySelector('.dyn-media').value.trim();
+    const title = row.querySelector('.dyn-title').value.trim();
+    const displayLabel = title || media || '이';
+
+    if (confirm(`[${displayLabel}] 리뷰 항목을 삭제하시겠습니까?`)) {
+      const container = document.getElementById('dynamicReviewsContainer');
+      if (container.querySelectorAll('.review-dynamic-row').length <= 1) {
+        // 행이 하나뿐일 때는 지우지 않고 입력값만 리셋
+        row.querySelector('.dyn-media').value = '';
+        row.querySelector('.dyn-title').value = '';
+        row.querySelector('.dyn-url').value = '';
+      } else {
+        row.remove();
+      }
+    }
   }
 
   function toggleNewMovieTarget() {
@@ -1046,21 +1114,20 @@
       document.getElementById('newKbsUrl').value.trim()
     ];
 
-    const mediaInputs = document.querySelectorAll('.dyn-media');
-    const titleInputs = document.querySelectorAll('.dyn-title');
-    const urlInputs = document.querySelectorAll('.dyn-url');
-
+    const rows = document.querySelectorAll('.review-dynamic-row');
     const multiReviews = [];
-    for (let i = 0; i < urlInputs.length; i++) {
-      const u = urlInputs[i].value.trim();
-      if (u) {
+    rows.forEach(r => {
+      const u = r.querySelector('.dyn-url').value.trim();
+      const m = r.querySelector('.dyn-media').value.trim();
+      const t = r.querySelector('.dyn-title').value.trim();
+      if (u || m || t) {
         multiReviews.push({
-          media: mediaInputs[i].value.trim(),
-          title: titleInputs[i].value.trim(),
+          media: m,
+          title: t,
           url: u
         });
       }
-    }
+    });
 
     const payload = {
       action: editModeOriginalTitle ? "updateMovieFull" : "saveMovieWithReview",
@@ -1222,7 +1289,6 @@
     }
   }
 
-  // 영화로 등록된 과업만 상세 이동
   function goToMovieDetailIfMatches(taskText) {
     if (isKnownMovie(taskText)) {
       document.getElementById('mainSearchInput').value = taskText;
@@ -1261,7 +1327,6 @@
     syncTodoServer();
   }
 
-  // 스핀 버튼 클릭 시: 입력창에 글이 남아있다면 먼저 등록한 뒤 전체 셔플 진행
   function shuffleCurrentTasks() {
     const input = document.getElementById('taskInput');
     if (input.value.trim()) {
